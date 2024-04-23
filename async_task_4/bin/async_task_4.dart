@@ -1,29 +1,46 @@
-/// What will happen here?
-void main(List<String> arguments) {
-  Future(() => print("1"));
-  Future.microtask(() => print("k"));
+void main() async {
+  methodA();
+  Future(() => print("meow"));
+  await methodB();
+  await methodC('main');
+  methodD();
+}
+
+methodA() {
+  print('A');
+}
+
+methodB() async {
+  print('B start');
+  await methodC('B');
+  print('B end');
+}
+
+methodC(String from) async {
+  print('C start from $from');
+
   Future(() {
-    print("2");
-    asyncFunc("2");
+    print('C running Future from $from');
+  }).then((_) {
+    print('C end of Future from $from');
   });
-  Future(() => print("3"));
 
-  print("main");
-  asyncFunc("main");
-  print("E");
+  print('C end from $from');
 }
 
-Future<void> asyncFunc(String from) async {
-  print("start  [from $from]");
-  // await creates empty microtask, and works like THEN with code after await(then pushes microtask to queue).
-  await (() async => print("middle [from $from]"))();
-  print("end    [from $from]");
+methodD() {
+  print('D');
 }
 
-/// Solution:
-/// Microtasks:
-/// Events: 1 2([replaced]) 3 asyncFunc("main") asyncFync(2)
-/// 
-/// main
-/// start [from main]
-/// middle [from main]
+/// A
+/// B start
+/// C start from B
+/// C end from B
+/// B end
+/// C start from main
+/// C end from main
+/// D
+/// C running Future from B
+/// C end of Future from B
+/// C running Future from main
+/// C end of Future from main
